@@ -67,64 +67,42 @@ header[data-testid="stHeader"] {
     margin-bottom: 22px;
 }
 
-/* 서비스형 사이드바 내비게이션 */
-[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stWidgetLabel"],
-[data-testid="stSidebar"] [data-testid="stRadio"] > div > label {
-    display: none !important;
-}
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+/* 사이드바의 실제 버튼 메뉴 */
+[data-testid="stSidebar"] [data-testid="stButton"] {
     width: 100%;
+    margin: 0 0 8px 0;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
+[data-testid="stSidebar"] [data-testid="stButton"] > button {
     width: 100%;
     min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     padding: 0 15px;
-    margin: 0;
-    border: 1px solid rgba(148, 163, 184, 0.13);
     border-radius: 11px;
-    background: rgba(255, 255, 255, 0.035);
-    cursor: pointer;
-    transition: background .18s ease, border-color .18s ease,
-                transform .18s ease, box-shadow .18s ease;
-}
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:hover {
-    background: rgba(255, 255, 255, 0.085);
-    border-color: rgba(148, 163, 184, 0.32);
-    transform: translateX(2px);
-}
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:has(input[type="radio"]:checked) {
-    background: linear-gradient(100deg, rgba(15, 159, 154, .24), rgba(15, 159, 154, .10));
-    border-color: rgba(45, 212, 191, .62);
-    box-shadow: inset 3px 0 0 #2dd4bf, 0 4px 14px rgba(0, 0, 0, .12);
-}
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label > div:first-child {
-    display: none !important;
-}
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label p {
-    margin: 0;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.045);
     color: #cbd5e1;
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: -.15px;
-    line-height: 1.4;
+    text-align: left;
+    transition: background .18s ease, border-color .18s ease,
+                transform .18s ease, box-shadow .18s ease;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:has(input[type="radio"]:checked) p {
+[data-testid="stSidebar"] [data-testid="stButton"] > button:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(148, 163, 184, 0.38);
+    color: #ffffff;
+    transform: translateX(2px);
+}
+[data-testid="stSidebar"] [data-testid="stButton"] > button[kind="primary"] {
+    background: linear-gradient(100deg, rgba(15, 159, 154, .30), rgba(15, 159, 154, .13));
     color: #f8fafc;
+    border: 1px solid rgba(45, 212, 191, .70);
+    box-shadow: inset 3px 0 0 #2dd4bf, 0 4px 14px rgba(0, 0, 0, .12);
     font-weight: 750;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-}
-[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:focus-within {
+[data-testid="stSidebar"] [data-testid="stButton"] > button:focus {
     outline: 2px solid rgba(45, 212, 191, .75);
     outline-offset: 2px;
 }
@@ -212,6 +190,65 @@ div[data-testid="stTabs"] button {
     color: #8490a3;
     font-size: 12px;
 }
+
+/* FINAL SIDEBAR NAV OVERRIDES — scoped to the six real navigation buttons */
+[data-testid="stSidebar"] [data-testid="stButton"] {
+    width: 100% !important;
+    margin: 0 0 9px 0 !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button,
+[data-testid="stSidebar"] [data-testid="stButton"] button[data-testid^="stBaseButton"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 17px !important;
+    border-radius: 12px !important;
+    border: 1px solid #344155 !important;
+    background: #1b2637 !important;
+    color: #dbe5f2 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,.10) !important;
+    font-family: 'Pretendard', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    letter-spacing: -.15px !important;
+    text-align: left !important;
+    transition: all .18s ease !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button p {
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    text-align: left !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover {
+    background: #26364a !important;
+    border-color: #64748b !important;
+    color: #ffffff !important;
+    transform: translateX(3px) !important;
+    box-shadow: 0 5px 14px rgba(0,0,0,.18) !important;
+}
+/* Selected page: Streamlit primary button */
+[data-testid="stSidebar"] [data-testid="stButton"] button[data-testid="stBaseButton-primary"],
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] {
+    background: linear-gradient(105deg, #0f766e 0%, #115e59 100%) !important;
+    border: 1px solid #2dd4bf !important;
+    color: #ffffff !important;
+    box-shadow: inset 4px 0 0 #5eead4, 0 6px 16px rgba(13,148,136,.20) !important;
+    font-weight: 750 !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[data-testid="stBaseButton-primary"] p {
+    color: #ffffff !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:focus,
+[data-testid="stSidebar"] [data-testid="stButton"] button:focus-visible {
+    outline: 2px solid #5eead4 !important;
+    outline-offset: 2px !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -285,11 +322,21 @@ with st.sidebar:
     st.markdown('<div class="sidebar-description">기후 데이터 지능형 분석 시스템</div>', unsafe_allow_html=True)
     st.markdown("---")
     st.markdown("작업 공간")
-    page = st.radio(
-        "메뉴",
-        ["대시보드", "데이터셋", "모델 학습", "테스트 · 시각화", "군집 분석", "실험 보고서"],
-        label_visibility="collapsed"
-    )
+    pages = ["대시보드", "데이터셋", "모델 학습", "테스트 · 시각화", "군집 분석", "실험 보고서"]
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "대시보드"
+
+    for page_option in pages:
+        if st.button(
+            page_option,
+            key=f"sidebar_nav_{page_option}",
+            type="primary" if st.session_state.current_page == page_option else "secondary",
+            use_container_width=True
+        ):
+            st.session_state.current_page = page_option
+            st.rerun()
+
+    page = st.session_state.current_page
     st.markdown("---")
     st.markdown("**등록된 데이터셋**")
     if st.session_state.datasets:
