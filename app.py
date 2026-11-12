@@ -68,13 +68,16 @@ header[data-testid="stHeader"] {
 }
 
 /* 서비스형 사이드바 내비게이션 */
+[data-testid="stSidebar"] [data-testid="stRadio"] > label {
+    display: none !important;
+}
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {
     display: flex;
     flex-direction: column;
     gap: 8px;
     width: 100%;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label {
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -89,20 +92,20 @@ header[data-testid="stHeader"] {
     transition: background .18s ease, border-color .18s ease,
                 transform .18s ease, box-shadow .18s ease;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:hover {
     background: rgba(255, 255, 255, 0.085);
     border-color: rgba(148, 163, 184, 0.32);
     transform: translateX(2px);
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input[type="radio"]:checked) {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:has(input[type="radio"]:checked) {
     background: linear-gradient(100deg, rgba(15, 159, 154, .24), rgba(15, 159, 154, .10));
     border-color: rgba(45, 212, 191, .62);
     box-shadow: inset 3px 0 0 #2dd4bf, 0 4px 14px rgba(0, 0, 0, .12);
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label > div:first-child {
     display: none !important;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label p {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label p {
     margin: 0;
     color: #cbd5e1;
     font-size: 14px;
@@ -110,7 +113,7 @@ header[data-testid="stHeader"] {
     letter-spacing: -.15px;
     line-height: 1.4;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input[type="radio"]:checked) p {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:has(input[type="radio"]:checked) p {
     color: #f8fafc;
     font-weight: 750;
 }
@@ -120,11 +123,10 @@ header[data-testid="stHeader"] {
     width: 1px;
     height: 1px;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:focus-within {
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] > label:focus-within {
     outline: 2px solid rgba(45, 212, 191, .75);
     outline-offset: 2px;
 }
-
 /* 메인 화면 */
 .topbar {
     background: #171c2d;
