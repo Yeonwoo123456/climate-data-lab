@@ -68,7 +68,8 @@ header[data-testid="stHeader"] {
 }
 
 /* 서비스형 사이드바 내비게이션 */
-[data-testid="stSidebar"] [data-testid="stRadio"] > label {
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-testid="stWidgetLabel"],
+[data-testid="stSidebar"] [data-testid="stRadio"] > div > label {
     display: none !important;
 }
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {
@@ -285,7 +286,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("작업 공간")
     page = st.radio(
-        " ",
+        "메뉴",
         ["대시보드", "데이터셋", "모델 학습", "테스트 · 시각화", "군집 분석", "실험 보고서"],
         label_visibility="collapsed"
     )
