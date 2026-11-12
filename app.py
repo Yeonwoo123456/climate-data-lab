@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
@@ -248,12 +248,24 @@ def model_pipeline(model_name, X):
     numeric = X.select_dtypes(include=np.number).columns.tolist()
     categorical = X.select_dtypes(exclude=np.number).columns.tolist()
     transformers = []
+
     if numeric:
-        transformers.append(("num", Pipeline([("imputer", SimpleImputer(strategy="median")),
-                                               ("scale", StandardScaler())]), numeric))
+        numeric_pipeline = Pipeline([
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scale", StandardScaler())
+        ])
+        transformers.append(("num", numeric_pipeline, numeric))
+
     if categorical:
-        transformers.append(("cat", Pipeline([("imputer", SimpleImputer(strategy="most_frequent"))]),
-                             categorical))
+        categorical_pipeline = Pipeline([
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("onehot", OneHotEncoder(handle_unknown="ignore"))
+        ])
+        transformers.append(("cat", categorical_pipeline, categorical))
+
+    if not transformers:
+        raise ValueError("학습에 사용할 수 있는 숫자형 또는 범주형 변수가 없습니다.")
+
     prep = ColumnTransformer(transformers, remainder="drop")
     models = {
         "선형 회귀": LinearRegression(),
@@ -271,7 +283,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("작업 공간")
     page = st.radio(
-        "작업 공간",
+        " ",
         ["대시보드", "데이터셋", "모델 학습", "테스트 · 시각화", "군집 분석", "실험 보고서"],
         label_visibility="collapsed"
     )
@@ -308,8 +320,6 @@ if page == "대시보드":
     st.write("")
     left, right = st.columns([1.45, 1])
     with left:
-        st.markdown('<div class="section-label">빠른 시작</div>', unsafe_allow_html=True)
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
         st.markdown("**새로운 데이터로 분석 시작하기**")
         st.write("기후 관련 CSV 파일을 업로드하거나 교육용 예시 데이터를 불러오세요.")
         if st.button("교육용 기후 데이터 불러오기", type="primary", use_container_width=True):
@@ -317,7 +327,6 @@ if page == "대시보드":
             st.session_state.active_dataset = "기후 변화 예시 데이터"
             st.success("교육용 합성 데이터를 불러왔습니다. 실제 관측 데이터가 아닌 실습용 데이터입니다.")
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
     with right:
         st.markdown('<div class="section-label">탐구 진행 순서</div>', unsafe_allow_html=True)
         st.markdown('<div class="panel">1. 공개 데이터 수집 및 업로드<br><br>2. 변수 선택과 데이터 탐색<br><br>3. 머신러닝 모델 학습<br><br>4. 예측 결과 및 오차 분석<br><br>5. 실험 결과 비교 및 보고서 작성</div>', unsafe_allow_html=True)
