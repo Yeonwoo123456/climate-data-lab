@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,34 +17,182 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.inspection import permutation_importance
 from datetime import datetime
 
-st.set_page_config(page_title="기후 연구소 | Climate Lab", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="기후 연구소 | Climate Lab", layout="wide")
 
 # ---------- 디자인 ----------
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
-html, body, [class*="css"] { font-family: 'Pretendard', sans-serif; }
-.stApp { background: #f4f7fb; }
-[data-testid="stSidebar"] { background: #111827; }
-[data-testid="stSidebar"] * { color: #e5e7eb !important; }
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#cbd5e1 !important; }
-.block-container { padding-top: 1.4rem; padding-bottom: 3rem; max-width: 1500px; }
-.topbar { background: #171c2d; padding: 13px 22px; border-radius: 14px; color: white; margin-bottom: 22px; }
-.brand { font-size: 20px; font-weight: 800; letter-spacing: .4px; }
-.brand span { color: #38bdf8; }
-.subbrand { color: #aab4c5; font-size: 12px; margin-top: 3px; }
-.page-title { font-size: 27px; font-weight: 800; color: #172033; margin: 4px 0 3px; }
-.page-sub { color: #778196; font-size: 13px; margin-bottom: 20px; }
-.panel { background: white; border: 1px solid #e8edf4; border-radius: 14px; padding: 18px 20px; }
-.metric-card { background: white; border: 1px solid #e8edf4; border-radius: 13px; padding: 16px 18px; }
-.metric-label { color:#778196; font-size:12px; font-weight:600; }
-.metric-value { color:#172033; font-size:25px; font-weight:800; margin-top:5px; }
-.metric-note { color:#16a085; font-size:11px; margin-top:3px; }
-.section-label { color:#253047; font-size:15px; font-weight:750; margin: 5px 0 12px; }
-div.stButton > button { border-radius: 9px; font-weight: 650; }
-div[data-testid="stTabs"] button { font-weight: 650; }
-[data-testid="stDataFrame"] { border-radius: 10px; }
-.small-muted { color:#8490a3; font-size:12px; }
+
+html, body, [class*="css"] {
+    font-family: 'Pretendard', sans-serif;
+}
+.stApp {
+    background: #f4f7fb;
+}
+
+/* 상단 콘텐츠 잘림 방지 */
+section.main > div.block-container {
+    padding-top: 3.2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1500px;
+}
+header[data-testid="stHeader"] {
+    background: transparent;
+}
+
+/* 사이드바 */
+[data-testid="stSidebar"] {
+    background: #111827;
+}
+[data-testid="stSidebar"] * {
+    color: #e5e7eb;
+}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    color: #cbd5e1;
+}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: #94a3b8;
+}
+.sidebar-brand {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #f8fafc;
+    margin: 8px 0 4px 0;
+}
+.sidebar-description {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 22px;
+}
+
+/* 라디오 메뉴를 실제 서비스형 내비게이션 버튼으로 표시 */
+[data-testid="stSidebar"] div[role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] > label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 43px;
+    padding: 9px 13px;
+    margin: 0;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    transition: background 0.18s ease, border-color 0.18s ease;
+    cursor: pointer;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(148, 163, 184, 0.28);
+}
+[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) {
+    background: rgba(15, 159, 154, 0.18);
+    border: 1px solid #0f9f9a;
+    box-shadow: inset 3px 0 0 #0f9f9a;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] > label > div:first-child {
+    display: none;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] > label p {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: #dbe4f0;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) p {
+    color: #ffffff;
+    font-weight: 750;
+}
+
+/* 메인 화면 */
+.topbar {
+    background: #171c2d;
+    padding: 20px 24px;
+    border-radius: 14px;
+    color: white;
+    margin: 0 0 26px 0;
+    overflow: visible;
+}
+.brand {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    line-height: 1.5;
+    color: #ffffff;
+}
+.brand span {
+    color: #38bdf8;
+}
+.subbrand {
+    color: #aab4c5;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 4px;
+}
+.page-title {
+    font-size: 27px;
+    font-weight: 800;
+    color: #172033;
+    margin: 4px 0 3px;
+}
+.page-sub {
+    color: #778196;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+.panel {
+    background: white;
+    border: 1px solid #e8edf4;
+    border-radius: 14px;
+    padding: 18px 20px;
+}
+.metric-card {
+    background: white;
+    border: 1px solid #e8edf4;
+    border-radius: 13px;
+    padding: 16px 18px;
+}
+.metric-label {
+    color: #778196;
+    font-size: 12px;
+    font-weight: 600;
+}
+.metric-value {
+    color: #172033;
+    font-size: 25px;
+    font-weight: 800;
+    margin-top: 5px;
+}
+.metric-note {
+    color: #16a085;
+    font-size: 11px;
+    margin-top: 3px;
+}
+.section-label {
+    color: #253047;
+    font-size: 15px;
+    font-weight: 750;
+    margin: 5px 0 12px;
+}
+div.stButton > button {
+    border-radius: 9px;
+    font-weight: 650;
+}
+div[data-testid="stTabs"] button {
+    font-weight: 650;
+}
+[data-testid="stDataFrame"] {
+    border-radius: 10px;
+}
+.small-muted {
+    color: #8490a3;
+    font-size: 12px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -103,15 +250,15 @@ def model_pipeline(model_name, X):
 
 # ---------- 사이드바 ----------
 with st.sidebar:
-    st.markdown("## 🌍 기후 연구소")
-    st.caption("기후 데이터 지능형 분석 시스템")
+    st.markdown('<div class="sidebar-brand">기후 연구소</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-description">기후 데이터 지능형 분석 시스템</div>', unsafe_allow_html=True)
     st.markdown("---")
-    page = st.radio("작업 공간", ["대시보드", "데이터셋", "모델 학습", "테스트 · 시각화", "군집 분석", "실험 보고서"], label_visibility="collapsed")
-    st.markdown("---")
-    st.markdown("**프로젝트 목록**")
-    st.markdown("📁 기후 변화 패턴 분석")
-    st.markdown("　├─ 모델 실험실")
-    st.markdown("　└─ 데이터 탐색")
+    st.markdown("작업 공간")
+    page = st.radio(
+        "작업 공간",
+        ["대시보드", "데이터셋", "모델 학습", "테스트 · 시각화", "군집 분석", "실험 보고서"],
+        label_visibility="collapsed"
+    )
     st.markdown("---")
     st.markdown("**등록된 데이터셋**")
     if st.session_state.datasets:
@@ -247,7 +394,7 @@ elif page == "모델 학습":
             time_order = st.checkbox("시간 순서에 따라 학습/테스트 분리 (연도별 데이터에 권장)", value=("연도" in df.columns))
             model_name = st.text_input("모델 이름", value=f"모델 {len(st.session_state.models)+1:02d}")
             st.caption("주의: 학습 데이터 비율과 테스트 데이터 비율은 서로 다른 설정입니다. 학습 데이터 비율은 분리된 학습 세트 중 실제 사용할 비율입니다.")
-            if st.button("▶ 모델 학습 시작", type="primary", use_container_width=True):
+            if st.button("모델 학습 시작", type="primary", use_container_width=True):
                 if not features:
                     st.error("학습에 사용할 변수를 하나 이상 선택하세요.")
                 else:
