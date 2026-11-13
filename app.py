@@ -372,7 +372,8 @@ if page == "대시보드":
     with left:
         st.markdown("**새로운 데이터로 분석 시작하기**")
         st.write("기후 관련 CSV 파일을 업로드하거나 교육용 예시 데이터를 불러오세요.")
-        if st.button("교육용 기후 데이터 불러오기", type="primary", use_container_width=True):
+        if st.button("교육용 기후 데이터 불러오기", type="primary", use_container_width=True,
+                       help="실제 관측값이 아닌 연습용 합성 기후 데이터를 불러옵니다."):
             st.session_state.datasets["기후 변화 예시 데이터"] = synthetic_climate_data()
             st.session_state.active_dataset = "기후 변화 예시 데이터"
             st.success("교육용 합성 데이터를 불러왔습니다. 실제 관측 데이터가 아닌 실습용 데이터입니다.")
@@ -393,9 +394,9 @@ elif page == "데이터셋":
     up_col, info_col = st.columns([1.2, 1])
     with up_col:
         st.markdown('<div class="section-label">데이터 가져오기</div>', unsafe_allow_html=True)
-        uploaded = st.file_uploader("CSV 파일 선택", type=["csv"], help="첫 번째 행은 열 이름이어야 합니다.")
-        dataset_name = st.text_input("데이터셋 이름", value=(uploaded.name.rsplit(".",1)[0] if uploaded else "새 기후 데이터"))
-        if uploaded is not None and st.button("데이터셋 등록", type="primary"):
+        uploaded = st.file_uploader("CSV 파일 선택", type=["csv"], help="분석할 데이터가 들어 있는 CSV 파일을 업로드합니다. 첫 번째 행은 변수명(열 이름)이어야 합니다.")
+        dataset_name = st.text_input("데이터셋 이름", value=(uploaded.name.rsplit(".",1)[0] if uploaded else "새 기후 데이터"), help="사이트 안에서 이 데이터를 구분하기 위한 이름입니다. 원본 CSV의 내용은 바뀌지 않습니다.")
+        if uploaded is not None and st.button("데이터셋 등록", type="primary", help="업로드한 CSV를 현재 분석할 데이터셋으로 등록합니다."):
             try:
                 df = pd.read_csv(uploaded)
                 st.session_state.datasets[dataset_name] = df
@@ -404,7 +405,7 @@ elif page == "데이터셋":
                 st.rerun()
             except Exception as e:
                 st.error(f"CSV를 읽을 수 없습니다: {e}")
-        if st.button("교육용 예시 데이터 추가"):
+        if st.button("교육용 예시 데이터 추가", help="실제 관측값이 아닌 연습용 합성 기후 데이터를 데이터셋 목록에 추가합니다."):
             st.session_state.datasets["기후 변화 예시 데이터"] = synthetic_climate_data()
             st.session_state.active_dataset = "기후 변화 예시 데이터"
             st.rerun()
@@ -418,8 +419,12 @@ elif page == "데이터셋":
         </div>
         """, unsafe_allow_html=True)
     if st.session_state.datasets:
-        selected = st.selectbox("현재 분석할 데이터셋", list(st.session_state.datasets.keys()),
-                                index=list(st.session_state.datasets.keys()).index(st.session_state.active_dataset) if st.session_state.active_dataset in st.session_state.datasets else 0)
+        selected = st.selectbox(
+            "현재 분석할 데이터셋",
+            list(st.session_state.datasets.keys()),
+            index=list(st.session_state.datasets.keys()).index(st.session_state.active_dataset) if st.session_state.active_dataset in st.session_state.datasets else 0,
+            help="현재 화면에서 탐색하거나 분석할 데이터 파일을 선택합니다."
+        )
         st.session_state.active_dataset = selected
         df = current_df()
         st.markdown('<div class="section-label">데이터 미리보기</div>', unsafe_allow_html=True)
@@ -453,23 +458,32 @@ elif page == "모델 학습":
         else:
             c1,c2,c3 = st.columns(3)
             with c1:
-                target = st.selectbox("예측할 변수 (목표값)", ncols, index=(ncols.index("평균기온(℃)") if "평균기온(℃)" in ncols else len(ncols)-1))
+                target = st.selectbox("예측할 변수 (목표값)", ncols, index=(ncols.index("평균기온(℃)") if "평균기온(℃)" in ncols else len(ncols)-1),
+                                      help="모델이 예측하도록 학습할 정답 변수입니다. 예: 평균기온을 선택하면 나머지 선택 변수로 평균기온을 예측합니다.")
             with c2:
                 features = st.multiselect("학습에 사용할 변수", [x for x in df.columns if x != target],
-                                          default=[x for x in ncols if x != target][:3])
+                                          default=[x for x in ncols if x != target][:3],
+                                          help="목표값을 예측할 때 입력으로 사용할 변수입니다. 관련성이 높은 변수를 선택하면 도움이 되지만, 불필요한 변수가 많으면 성능이 낮아질 수도 있습니다.")
             with c3:
-                test_size = st.slider("테스트 데이터 비율 (%)", 10, 40, 20, 5)
+                test_size = st.slider("테스트 데이터 비율 (%)", 10, 40, 20, 5,
+                                   help="전체 데이터 중 학습이 끝난 모델의 성능을 확인하는 데 따로 남겨둘 비율입니다. 높이면 평가가 안정적일 수 있지만 모델이 학습에 사용할 데이터는 줄어듭니다. 보통 20~30%부터 시작합니다.")
             st.markdown('<div class="section-label">② 알고리즘 선택</div>', unsafe_allow_html=True)
-            algorithm = st.selectbox("학습 알고리즘", ["선형 회귀", "의사결정나무", "랜덤 포레스트", "그래디언트 부스팅", "K-최근접 이웃"])
+            algorithm = st.selectbox("학습 알고리즘", ["선형 회귀", "의사결정나무", "랜덤 포레스트", "그래디언트 부스팅", "K-최근접 이웃"],
+                                      help="데이터에서 패턴을 학습하는 방법입니다. 선형 회귀는 단순한 관계, 나무·앙상블 모델은 복잡한 관계를 학습하는 데 유용합니다. 데이터에 따라 적합한 알고리즘이 달라지므로 여러 모델을 비교해 보세요.")
             c4,c5 = st.columns(2)
             with c4:
-                train_ratio = st.slider("학습 데이터 사용 비율 (%)", 10, 100, 100, 10)
+                train_ratio = st.slider("학습 데이터 사용 비율 (%)", 10, 100, 100, 10,
+                                   help="테스트 데이터를 분리하고 남은 학습 데이터 중 실제 모델 학습에 사용할 비율입니다. 낮추면 학습 시간이 줄 수 있지만 학습 정보가 부족해져 예측 성능이 떨어질 수 있습니다.")
             with c5:
-                noise_pct = st.slider("학습 데이터 오류 추가 (%)", 0, 30, 0, 5)
-            time_order = st.checkbox("시간 순서에 따라 학습/테스트 분리 (연도별 데이터에 권장)", value=("연도" in df.columns))
-            model_name = st.text_input("모델 이름", value=f"모델 {len(st.session_state.models)+1:02d}")
+                noise_pct = st.slider("학습 데이터 오류 추가 (%)", 0, 30, 0, 5,
+                                   help="학습 데이터의 목표값 일부에 무작위 오차를 더해 데이터가 부정확할 때 모델이 어떻게 반응하는지 실험합니다. 값을 높일수록 학습 데이터가 더 noisy해져 성능이 나빠질 수 있습니다. 실제 원본 데이터는 변경하지 않습니다.")
+            time_order = st.checkbox("시간 순서에 따라 학습/테스트 분리 (연도별 데이터에 권장)", value=("연도" in df.columns),
+                                help="연도 순으로 앞부분은 학습용, 뒷부분은 테스트용으로 나눕니다. 미래 예측처럼 시간의 흐름이 중요한 데이터에서 미래 정보가 학습에 섞이는 것을 줄여줍니다.")
+            model_name = st.text_input("모델 이름", value=f"모델 {len(st.session_state.models)+1:02d}",
+                           help="학습이 끝난 모델을 목록과 실험 기록에서 구분하기 위한 이름입니다.")
             st.caption("주의: 학습 데이터 비율과 테스트 데이터 비율은 서로 다른 설정입니다. 학습 데이터 비율은 분리된 학습 세트 중 실제 사용할 비율입니다.")
-            if st.button("모델 학습 시작", type="primary", use_container_width=True):
+            if st.button("모델 학습 시작", type="primary", use_container_width=True,
+                           help="선택한 변수와 설정으로 모델을 학습하고, 분리해 둔 테스트 데이터에서 성능을 평가합니다."):
                 if not features:
                     st.error("학습에 사용할 변수를 하나 이상 선택하세요.")
                 else:
@@ -530,7 +544,8 @@ elif page == "테스트 · 시각화":
         st.info("먼저 모델 학습실에서 모델을 학습시켜 주세요.")
     else:
         names = list(st.session_state.models.keys())
-        selected = st.selectbox("분석할 모델 선택", names)
+        selected = st.selectbox("분석할 모델 선택", names,
+                              help="성능 지표와 예측 그래프를 확인할 학습 완료 모델을 선택합니다.")
         m = st.session_state.models[selected]
         a,b,c = st.columns(3)
         a.metric("평균 절대 오차 (MAE)", f"{m['MAE']:.4f}")
@@ -575,9 +590,11 @@ elif page == "군집 분석":
         if len(nums) < 2:
             st.warning("군집 분석에는 숫자형 변수가 두 개 이상 필요합니다.")
         else:
-            selected_cols = st.multiselect("군집 분석에 사용할 변수", nums, default=nums[:min(3,len(nums))])
-            k = st.slider("군집 개수", 2, 8, 3)
-            if len(selected_cols) >= 2 and st.button("군집 분석 실행", type="primary"):
+            selected_cols = st.multiselect("군집 분석에 사용할 변수", nums, default=nums[:min(3,len(nums))],
+                                           help="서로 비슷한 데이터끼리 묶을 때 비교할 숫자형 변수입니다. 선택한 변수의 값과 패턴을 바탕으로 군집이 만들어집니다.")
+            k = st.slider("군집 개수", 2, 8, 3,
+                           help="데이터를 몇 개 그룹으로 나눌지 정합니다. 너무 적으면 서로 다른 특성이 합쳐지고, 너무 많으면 비슷한 그룹이 잘게 나뉠 수 있습니다. 여러 값을 시험해 결과를 비교하세요.")
+            if len(selected_cols) >= 2 and st.button("군집 분석 실행", type="primary", help="선택한 변수의 패턴이 비슷한 데이터끼리 지정한 개수만큼 그룹화합니다."):
                 data = df[selected_cols].replace([np.inf,-np.inf], np.nan)
                 data = data.fillna(data.median(numeric_only=True)).dropna()
                 scaler = StandardScaler()
@@ -607,7 +624,8 @@ elif page == "실험 보고서":
         st.markdown('<div class="section-label">실험 기록</div>', unsafe_allow_html=True)
         st.dataframe(hist, use_container_width=True, hide_index=True)
         st.markdown('<div class="section-label">모델별 성능 비교</div>', unsafe_allow_html=True)
-        metric = st.selectbox("비교 지표", ["MAE","RMSE","R²"])
+        metric = st.selectbox("비교 지표", ["MAE","RMSE","R²"],
+                                  help="모델의 예측 오차나 설명력을 비교하는 기준입니다. MAE와 RMSE는 낮을수록 좋고, R²는 일반적으로 1에 가까울수록 좋습니다.")
         plot_df = hist.dropna(subset=[metric])
         if not plot_df.empty:
             fig = px.bar(plot_df, x="이름", y=metric, color="알고리즘", text_auto=".3f",
@@ -615,7 +633,8 @@ elif page == "실험 보고서":
             fig.update_layout(template="plotly_white", height=400)
             st.plotly_chart(fig, use_container_width=True)
         csv = hist.to_csv(index=False).encode("utf-8-sig")
-        st.download_button("실험 기록 CSV 다운로드", csv, "기후연구소_실험기록.csv", "text/csv")
+        st.download_button("실험 기록 CSV 다운로드", csv, "기후연구소_실험기록.csv", "text/csv",
+                           help="현재 세션에 저장된 모델 학습 조건과 평가 결과를 CSV 파일로 내려받습니다.")
         st.caption("MAE와 RMSE는 낮을수록, R²는 일반적으로 1에 가까울수록 예측 성능이 좋습니다. 단, 서로 다른 테스트 데이터의 점수는 직접 비교할 때 주의해야 합니다.")
 
 st.markdown("---")
